@@ -13,6 +13,7 @@ Route::post('/upload', function () {
         $data =  array_map('str_getcsv', file(request()->mycsv));
         $header = $data[0];
         unset($data[0]);
+        return $header;
         return $data;
     }
 
