@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Throwable;
 use App\Models\Sales;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -38,5 +39,10 @@ class SalesCsvProcess implements ShouldQueue
             $saleData = array_combine($this->header, $sale);
             Sales::create($saleData);
         }
+    }
+
+    public function failed(Throwable $exception)
+    {
+        // Send user notification of failure, etc...
     }
 }
