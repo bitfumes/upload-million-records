@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SalesCsvProcess;
+use Illuminate\Support\Facades\Bus;
 
 class SalesController extends Controller
 {
@@ -19,6 +20,8 @@ class SalesController extends Controller
             $chunks = array_chunk($data, 1000);
 
             $header = [];
+            $batch  = Bus::batch([])->dispatch();
+
             foreach ($chunks as $key => $chunk) {
                 $data = array_map('str_getcsv', $chunk);
 
@@ -27,16 +30,18 @@ class SalesController extends Controller
                     unset($data[0]);
                 }
 
-                if ($key == 2) {
-                    $header = [];
-                }
-
-                SalesCsvProcess::dispatch($data, $header);
+                $batch->add(new SalesCsvProcess($data, $header));
             }
 
-            return 'stored';
+            return $batch;
         }
 
         return 'please upload file';
+    }
+
+    public function batch()
+    {
+        $batchId = request('id');
+        return Bus::findBatch($batchId);
     }
 }
