@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SalesCsvProcess;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Bus;
 
 class SalesController extends Controller
@@ -43,5 +44,15 @@ class SalesController extends Controller
     {
         $batchId = request('id');
         return Bus::findBatch($batchId);
+    }
+
+    public function batchInProgress()
+    {
+        $batches = DB::table('job_batches')->where('pending_jobs', '>', 0)->get();
+        if (count($batches) > 0) {
+            return Bus::findBatch($batches[0]->id);
+        }
+
+        return [];
     }
 }
